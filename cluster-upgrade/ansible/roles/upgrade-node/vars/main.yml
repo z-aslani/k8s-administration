@@ -1,0 +1,4 @@
+---
+# vars file for upgrade-node
+
+k8s_cluster_pod_cidr: "198."

@@ -1,0 +1,5 @@
+---
+# tasks file for verify-cluster-status role
+- name: get all cluster nodes readiness state
+  shell: kubectl get nodes -o wide
+  when: 'inventory_hostname == groups["Master"][0]'

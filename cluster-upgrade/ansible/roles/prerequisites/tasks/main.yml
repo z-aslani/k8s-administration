@@ -1,0 +1,7 @@
+---
+# tasks file for prerequisites
+- name: setup proxy for vm
+  import_tasks: proxy/proxy.yml
+
+- name: upgrade kubeadm to the next minor version
+  import_tasks: kubeadm/kubeadm.yml

@@ -1,0 +1,4 @@
+---
+# vars file for prerequisites
+
+proxy_url: http://195.201.23.73.:3128

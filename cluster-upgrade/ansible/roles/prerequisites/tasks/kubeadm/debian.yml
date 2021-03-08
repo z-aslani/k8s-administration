@@ -1,0 +1,17 @@
+- name: .:(Debian):. unhold kubeadm apt package
+  dpkg_selections:
+    name: kubeadm
+    selection: install
+
+
+- name: .:(Debian):. upgrade kubeadm binary to the next minor version
+  apt:
+    name: "kubeadm-{{k8s_next_version}}"
+    state: present
+    update_cache: yes
+
+
+- name: .:(Debian):. unhold kubeadm apt package
+  dpkg_selections:
+    name: kubeadm
+    selection: hold

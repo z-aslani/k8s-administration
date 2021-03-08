@@ -1,0 +1,42 @@
+- name: .:(Debian):. creating apt proxy file
+  file:
+    path: /etc/apt/apt.conf.d/proxy.conf
+    state: touch
+    mode: '0644'
+
+
+- name: .:(Debian):. removing previous proxy from /etc/apt/apt.conf.d/proxy.confproxy.conf
+  replace:
+    path: /etc/apt/apt.conf.d/proxy.conf
+    regexp: '^(Acquire::.*)$'
+    replace: '#\1'
+
+
+- name: .(Debian):. adding new proxy to /etc/apt/apt.conf.d/proxy.confproxy.conf::HTTP
+  lineinfile:
+    path: /etc/apt/apt.conf.d/proxy.conf
+    line: 'Acquire::http::Proxy "{{proxy_url}}";'
+    create: yes
+    state: present
+
+
+- name: .(Debian):. adding new proxy to /etc/apt/apt.conf.d/proxy.confproxy.conf::HTTPS
+  lineinfile:
+    path: /etc/apt/apt.conf.d/proxy.conf
+    line: 'Acquire::https::Proxy "{{proxy_url}}";'
+    create: yes
+    state: present
+
+
+- name: .:(Debian):. creating docker proxy file
+  file:
+    path: /etc/systemd/system/docker.service.d/
+    state: directory
+    mode: '0755'
+
+
+- name: .:(Debian):.setting proxy for docker
+  template:
+    src: templates/proxy_conf.j2
+    dest: /etc/systemd/system/docker.service.d/proxy.conf 
+    force: yes

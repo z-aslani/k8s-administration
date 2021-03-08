@@ -1,0 +1,10 @@
+---
+# tasks file for proxy tasks
+- name: set yum and docker proxy for VM
+  import_tasks: rhel.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
+
+
+- name: set apt and docker proxy for VM
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'

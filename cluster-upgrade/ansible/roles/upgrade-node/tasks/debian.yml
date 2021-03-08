@@ -1,0 +1,28 @@
+---
+- name: .:(Debian):. unhold kubectl and kubelet packages
+  dpkg_selections:
+    name: kubelet
+    selection: install
+
+
+- name: .:(Debian):. upgrade kubelet and kubectl binary to the next version
+  apt:
+    name: "kubelet-{{k8s_next_version}}"
+    state: present
+    update_cache: yes
+
+
+- name: .:(Debian):.  daemon reload and restart kubelet systemd service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+
+- name: .:(Debian):. hold kubeadm apt package
+  dpkg_selections:
+    name: item
+    selection: hold
+  with_items:
+  - kubelet
+  - kubectl
+  

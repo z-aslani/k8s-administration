@@ -1,0 +1,27 @@
+- name: prerequisites for k8s cluster
+  hosts: Master,Worker
+  tasks:
+    - import_role:
+        name: prerequisites
+
+
+- vars_prompt:
+- name: prompt user to inspect manual upgrade requirements
+  prompt: "please watch previous task output carefully and before proceeding, take care of manual upgrade action, if there is any."
+  default: ok
+
+
+- name: upgrade k8s cluster to next minor version
+  hosts: Master,Worker
+  any_errors_fatal: true
+  serial: 1
+  tasks:
+    - import_role:
+        name: upgrade-node
+
+
+- name: verify k8s cluster status after upgrade
+  hosts: Master,Worker
+  tasks:
+    - import_role:
+        name: verify-cluster-status

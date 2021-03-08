@@ -1,0 +1,83 @@
+---
+
+- name: output kubernetes upgrade plan
+  shell: kubeadm upgrade plan
+  when: 'inventory_hostname == groups["Master"][0]'
+
+
+- name: check API server pod manifest
+  stat:
+    path: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+  register: api_server_stat
+  when: "'Master' in group_names"
+
+
+- name: drain node from cluster
+  shell: kubectl drain {{ ansible_hostname|lower }} --ignore-daemonsets
+  register: drain_node
+  until: drain_node|success
+  retries: 3
+  delay: 30
+  failed_when: false
+  when: "('Master' in group_names and api_server_stat.stat.exists) or 'Worker' in group_names"
+
+
+- name: fail if the node was not drained successfully
+  fail:
+    msg: |
+      Attempted to drain the node, but 'kubectl drain' returned an error:
+
+      "{{ drain_node.stderr }}"
+  when: drain_node|failed
+
+
+- name: upgrade control plane to the next version - upgrade apply
+  shell: kubeadm upgrade apply v{{ k8s_next_version }}
+  when: "inventory_hostname == groups['Master'][0]"
+
+
+- name: Upgrade Additional Control Plane Nodes
+  shell: kubeadm upgrade node
+  when: "'Master' in group_names and inventory_hostname != groups['Master'][0]"
+
+
+- name: upgrade container network interface of the cluster to the next compatible version
+  community.kubernetes.k8s:
+    kubeconfig: kubeconfig
+    context: "{{k8s_cluster}}"
+    namespace: kube-system
+    resource_definition: "weavenet-2.7.yml"
+    state: patch
+  when: "inventory_hostname == groups['Master'][0] and upgrade_cni and network_plugin == 'weavenet'"
+
+
+- name: config calico manifests before upgrading CNI
+  replace:
+    path: "calico-3.17.0.yml"
+    regexp: '^CALICO_IPV4POOL_CIDR_VALUE$'
+    replace: '{{k8s_cluster_pod_cidr}}'
+  when: "inventory_hostname == groups['Master'][0] and upgrade_cni and network_plugin == 'calico'"
+
+
+- name: upgrade calico container network interface of the cluster to the next compatible version
+  community.kubernetes.k8s:
+    kubeconfig: kubeconfig
+    context: "{{k8s_cluster}}"
+    namespace: kube-system
+    resource_definition: "calico-3.17.0.yml"
+    state: patch
+  when: "inventory_hostname == groups['Master'][0] and upgrade_cni and network_plugin == 'calico'"
+
+
+- name: uncordon node
+  shell: "kubectl uncordon {{ansible_hostname|lower}}"
+
+
+- name: upgrade rhel-based kubernetes cluster to the next minor version
+  import_tasks: rhel.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
+
+
+- name: upgrade debian-based kubernetes cluster to the next minor version 
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'

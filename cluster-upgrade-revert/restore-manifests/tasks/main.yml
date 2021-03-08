@@ -1,0 +1,26 @@
+---
+# handlers file for upgrade-node
+---
+- name: check etcd backup
+  stat:
+    path: "/etc/kubernetes/tmp/kubeadm-backup-etcd-*"
+  register: etcd_backup_dir
+  listen: "restore control plane node"
+
+
+- name: restore etcd backup
+  command: "mv {{ etcd_backup_dir }}/* /var/lib/etcd"
+  listen: "restore control plane node"
+  when: etcd_backup_dir.stat.isdir is defined and etcd_backup_dir.stat.isdir
+
+
+- name: check pod manifests backup
+  stat:
+    path: "/etc/kubernetes/tmp/kubeadm-backup-manifests-*"
+  register: static_manifests_backup_dir
+  listen: "restore control plane node"
+
+- name: restore pod manifests backup
+  command: "mv {{ static_manifests_backup_dir }}/* /etc/kubernetes/manifests"
+  when: static_manifests_backup_dir.stat.isdir is defined and static_manifests_backup_dir.stat.isdir
+  listen: "restore control plane node"

@@ -1,0 +1,5 @@
+- name: .:(RHEL):. upgrade kubeadm binary to the next version
+  yum:
+    name: "kubeadm-{{k8s_next_version}}"
+    state: present
+    update_cache: yes

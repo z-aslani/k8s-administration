@@ -1,0 +1,36 @@
+[Master]
+172.16.1.101
+
+[Workers]
+# Tapsell
+172.16.6.[1:35]
+
+# Mediaad
+172.16.1.[102:112]
+
+# Metrix
+172.16.4.1
+172.16.4.[3:5]
+
+# Searchad
+172.16.5.[1:3]
+
+# Digiad
+172.16.18.[1:3]
+
+# VideoBazaar
+172.16.15.[1:2]
+
+# Tagrowlyze
+172.16.9.2
+
+# Common
+172.16.10.1
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=root
+ansible_ssh_port=22
+
+env_HTTP_proxy="http://195.201.23.73:3128"
+env_HTTPS_proxy="http://195.201.23.73:3128"
