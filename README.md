@@ -19,6 +19,3 @@ Playbook Arguments:
 
 
 __Warning__: This playbook has not been thoroughly tested yet and is a work in progress.
-
-## Authors:
-Ali Salehi
